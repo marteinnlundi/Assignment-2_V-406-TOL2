@@ -27,7 +27,23 @@ capture.output({
   cat("\n=== LONG DATA ===\n"); print(skim(long))
 }, file = FN("01_skim_data", "txt"))
 
-# ----- 2) Plot all indices (Task 1) -----
+# ----- 2) Rebuild proper lag variables -----
+wide <- wide %>%
+  arrange(time) %>%
+  mutate(
+    sales_lag1 = lag(sales, 1),
+    sales_lag2 = lag(sales, 2),
+    sales_lag3 = lag(sales, 3),
+    purchase_power_lag1 = lag(purchase_power, 1),
+    purchase_power_lag2 = lag(purchase_power, 2),
+    purchase_power_lag3 = lag(purchase_power, 3),
+    consumer_sentiment_lag1 = lag(consumer_sentiment, 1),
+    consumer_sentiment_lag2 = lag(consumer_sentiment, 2),
+    consumer_sentiment_lag3 = lag(consumer_sentiment, 3)
+  ) %>%
+  drop_na()
+
+# ----- 3) Plot all indices (Task 1) -----
 g1 <- ggplot(long, aes(x = time, y = value, color = name)) +
   geom_line(linewidth = 0.8) +
   labs(title = "Sales, Purchase Power, and Consumer Sentiment Over Time",
@@ -35,11 +51,11 @@ g1 <- ggplot(long, aes(x = time, y = value, color = name)) +
   theme_minimal(base_size = 11) +
   theme(legend.position = "bottom")
 
-ggsave(FNF("02_line_all_indices", "png"), g1, width = 7, height = 5, dpi = 300)
+ggsave(FNF("03_line_all_indices", "png"), g1, width = 7, height = 5, dpi = 300)
 
-# ----- 3) Regression (Task 2) -----
+# ----- 4) Regression (Task 2) -----
 m_time <- lm(sales ~ time, data = wide)
-capture.output(summary(m_time), file = FN("03_regression_sales_time_summary", "txt"))
+capture.output(summary(m_time), file = FN("04_regression_sales_time_summary", "txt"))
 
 wide <- wide |> mutate(resid_time = resid(m_time))
 
@@ -50,43 +66,40 @@ g2 <- ggplot(wide, aes(x = time, y = resid_time)) +
        x = "Time (Months)", y = "Residuals") +
   theme_minimal(base_size = 11)
 
-ggsave(FNF("03_residuals_over_time", "png"), g2, width = 7, height = 5, dpi = 300)
+ggsave(FNF("04_residuals_over_time", "png"), g2, width = 7, height = 5, dpi = 300)
 
-# ----- 4) Residual tests -----
+# Residual diagnostics
 dw_out  <- lmtest::dwtest(m_time)
 adf_out <- tseries::adf.test(wide$resid_time)
-
-dw_pval  <- dw_out$p.value
-adf_pval <- adf_out$p.value
 
 capture.output({
   cat("=== Task 2: Residual Diagnostics Summary ===\n")
   cat("Durbin–Watson statistic:", round(dw_out$statistic, 3), "\n")
-  cat("DW p-value:", round(dw_pval, 5), "\n")
-  cat("ADF p-value:", round(adf_pval, 5), "\n")
+  cat("DW p-value:", round(dw_out$p.value, 5), "\n")
+  cat("ADF p-value:", round(adf_out$p.value, 5), "\n")
 }, file = FN("04_residual_diagnostics_summary", "txt"))
 
 # ----- 5) Granger causality (Task 3) -----
-# --- (a) purchase_power → sales ---
+# (a) purchase_power → sales
 mod_sales_r <- lm(sales ~ sales_lag1 + sales_lag2 + sales_lag3, data = wide)
 mod_sales_pp <- lm(sales ~ sales_lag1 + sales_lag2 + sales_lag3 +
                      purchase_power_lag1 + purchase_power_lag2 + purchase_power_lag3,
                    data = wide)
 anova_sales_pp <- anova(mod_sales_r, mod_sales_pp)
 
-# --- (b) consumer_sentiment → sales ---
+# (b) consumer_sentiment → sales
 mod_sales_cs <- lm(sales ~ sales_lag1 + sales_lag2 + sales_lag3 +
                      consumer_sentiment_lag1 + consumer_sentiment_lag2 + consumer_sentiment_lag3,
                    data = wide)
 anova_sales_cs <- anova(mod_sales_r, mod_sales_cs)
 
-# --- (c) consumer_sentiment → purchase_power ---
-mod_pp_r <- lm(purchase_power ~ purchase_power_lag1 + purchase_power_lag2 + purchase_power_lag3,
+# (other) purchase_power → consumer_sentiment
+mod_cs_r <- lm(consumer_sentiment ~ consumer_sentiment_lag1 + consumer_sentiment_lag2 + consumer_sentiment_lag3,
                data = wide)
-mod_pp_cs <- lm(purchase_power ~ purchase_power_lag1 + purchase_power_lag2 + purchase_power_lag3 +
-                  consumer_sentiment_lag1 + consumer_sentiment_lag2 + consumer_sentiment_lag3,
+mod_cs_pp <- lm(consumer_sentiment ~ consumer_sentiment_lag1 + consumer_sentiment_lag2 + consumer_sentiment_lag3 +
+                  purchase_power_lag1 + purchase_power_lag2 + purchase_power_lag3,
                 data = wide)
-anova_pp_cs <- anova(mod_pp_r, mod_pp_cs)
+anova_cs_pp <- anova(mod_cs_r, mod_cs_pp)
 
 # Save full ANOVA outputs
 capture.output({
@@ -95,19 +108,18 @@ capture.output({
   cat("\n---------------------------------------------\n")
   cat("(b) consumer_sentiment → sales\n"); print(anova_sales_cs)
   cat("\n---------------------------------------------\n")
-  cat("(c) consumer_sentiment → purchase_power\n"); print(anova_pp_cs)
+  cat("(other) purchase_power → consumer_sentiment\n"); print(anova_cs_pp)
 }, file = FN("05_granger_tests_full", "txt"))
 
-# Compact summary table
+# Compact summary
 granger_summary <- tibble(
   test = c("purchase_power → sales",
            "consumer_sentiment → sales",
-           "consumer_sentiment → purchase_power"),
+           "purchase_power → consumer_sentiment"),
   p_value = c(anova_sales_pp$`Pr(>F)`[2],
               anova_sales_cs$`Pr(>F)`[2],
-              anova_pp_cs$`Pr(>F)`[2])
+              anova_cs_pp$`Pr(>F)`[2])
 )
-
 write.csv(granger_summary, FN("05_granger_tests_summary", "csv"), row.names = FALSE)
 
 # ----- 99) Session info -----
