@@ -96,29 +96,38 @@ ggsave(FNF("03_residuals_over_time", "png"), g2, width = 7, height = 5, dpi = 30
 #   • save all results to one text file
 #   • flag any p < 0.05 as evidence of causality
 
+
 # ----- 6) Summary output -----
 
-# For Task 1, only visual summary + short interpretation file
-
 summary_notes <- tibble(
-  task = "Task 1 — Time-Series Plot",
-  description = "Line chart of sales, purchase_power, and consumer_sentiment over time",
-  figure = FNF("02_line_all_indices","png"),
+  task = c("Task 1 — Time-Series Plot", "Task 2 — Regression of Sales on Time"),
+  description = c(
+    "Visual comparison of sales, purchase_power, and consumer_sentiment over time",
+    "Linear regression of sales on time with residual analysis"
+  ),
+  figure = c(
+    FNF("02_line_all_indices", "png"),
+    FNF("03_residuals_over_time", "png")
+  ),
   key_points = c(
-    "Indexes trend upward at varying rates",
-    "Possible short lead of purchase_power before sales",
-    "Consumer_sentiment appears smoother and lags slightly"
+    "All three indexes show similar long-run movement; possible short lead of purchase_power before sales",
+    "Regression shows an upward trend in sales over time; residuals fluctuate around zero, indicating a reasonable fit"
   )
 )
 
-write.csv(summary_notes, FN("06_summary_task1", "csv"), row.names = FALSE)
+write.csv(summary_notes, FN("06_summary_tasks", "csv"), row.names = FALSE)
 
 capture.output({
-  cat("=== Task 1 Summary ===\n")
-  cat("Visual comparison of the three indexes suggests similar long-run movement.\n")
-  cat("Purchase power and consumer sentiment may precede changes in sales slightly.\n")
-  cat("No statistical tests applied yet — interpretation is descriptive only.\n")
-}, file = FN("06_summary_task1_notes", "txt"))
+  cat("=== Summary of Tasks ===\n\n")
+  cat("Task 1 — Time-Series Plot:\n")
+  cat("• All indexes trend upward over the 10-year period.\n")
+  cat("• Purchase power and consumer sentiment show mild lead behavior relative to sales.\n\n")
+  cat("Task 2 — Regression of Sales on Time:\n")
+  cat("• Estimated a simple linear trend: sales ~ time.\n")
+  cat("• Model summary and residual plot saved to outputs/figs.\n")
+  cat("• Residuals show no strong pattern; next step is to formally test for autocorrelation and stationarity.\n")
+}, file = FN("06_summary_tasks_notes", "txt"))
+
 
 # ----- 99) Session info -----
 capture.output(sessionInfo(), file = FN("99_sessionInfo", "txt"))
