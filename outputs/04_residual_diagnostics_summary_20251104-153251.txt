@@ -1,0 +1,4 @@
+=== Task 2: Residual Diagnostics Summary ===
+Durbin–Watson statistic: 0.172 
+DW p-value: 0 
+ADF p-value: 0.57837 

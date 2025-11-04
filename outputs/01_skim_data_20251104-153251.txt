@@ -1,0 +1,79 @@
+=== WIDE DATA ===
+── Data Summary ────────────────────────
+                           Values
+Name                       wide  
+Number of rows             120   
+Number of columns          16    
+_______________________          
+Column type frequency:           
+  character                1     
+  numeric                  15    
+________________________         
+Group variables            None  
+
+── Variable type: character ────────────────────────────────────────────────────
+  skim_variable n_missing complete_rate min max empty n_unique whitespace
+1 month                 0             1   3   9     0       12          0
+
+── Variable type: numeric ──────────────────────────────────────────────────────
+   skim_variable           n_missing complete_rate   mean    sd    p0    p25
+ 1 purchase_power                  0             1 112.    5.33 100   108.  
+ 2 purchase_power_lag1             0             1 112.    5.38 100   108.  
+ 3 purchase_power_lag2             0             1 112.    5.47  99.8 108.  
+ 4 purchase_power_lag3             0             1 112.    5.60  97.4 108.  
+ 5 consumer_sentiment              0             1 113.    5.58 100   108.  
+ 6 consumer_sentiment_lag1         0             1 113.    5.71  98.3 108.  
+ 7 consumer_sentiment_lag2         0             1 113.    5.84  96.8 108.  
+ 8 consumer_sentiment_lag3         0             1 112.    5.97  96.8 108.  
+ 9 sales                           0             1 113.    5.91 100   109.  
+10 sales_lag1                      0             1 113.    6.10  96.0 109.  
+11 sales_lag2                      0             1 113.    6.20  96.0 109.  
+12 sales_lag3                      0             1 113.    6.34  96.0 109.  
+13 month_num                       0             1   6.5   3.47   1     3.75
+14 time                            0             1  60.5  34.8    1    30.8 
+15 year                            0             1   6.25  2.92   1     4   
+     p50    p75 p100 hist 
+ 1 113.  116.   122. ▂▆▇▇▅
+ 2 113.  116.   122. ▂▆▇▇▅
+ 3 113.  116.   122. ▂▆▇▇▅
+ 4 112.  116.   122. ▁▅▆▇▅
+ 5 113.  117.   123. ▂▆▇▇▅
+ 6 113.  117.   123. ▁▅▇▇▅
+ 7 113.  117.   123. ▁▃▅▇▃
+ 8 113.  117.   123. ▁▃▅▇▃
+ 9 114.  118.   125. ▃▆▇▇▃
+10 114.  118.   125. ▁▅▇▇▃
+11 114.  118.   125. ▁▅▇▇▃
+12 113.  118.   125. ▁▅▇▇▃
+13   6.5   9.25  12  ▇▅▅▅▇
+14  60.5  90.2  120  ▇▇▇▇▇
+15   6     9     11  ▇▇▇▇▆
+
+=== LONG DATA ===
+── Data Summary ────────────────────────
+                           Values
+Name                       long  
+Number of rows             360   
+Number of columns          5     
+_______________________          
+Column type frequency:           
+  character                1     
+  numeric                  4     
+________________________         
+Group variables            None  
+
+── Variable type: character ────────────────────────────────────────────────────
+  skim_variable n_missing complete_rate min max empty n_unique whitespace
+1 name                  0             1   5  18     0        3          0
+
+── Variable type: numeric ──────────────────────────────────────────────────────
+  skim_variable n_missing complete_rate   mean    sd  p0    p25   p50    p75
+1 time                  0             1  60.5  34.7    1  30.8   60.5  90.2 
+2 month_num             0             1   6.5   3.46   1   3.75   6.5   9.25
+3 year                  0             1   6.25  2.91   1   4      6     9   
+4 value                 0             1 113.    5.61 100 109.   113.  117.  
+  p100 hist 
+1 120  ▇▇▇▇▇
+2  12  ▇▅▅▅▇
+3  11  ▇▇▇▇▆
+4 125. ▂▅▇▇▂

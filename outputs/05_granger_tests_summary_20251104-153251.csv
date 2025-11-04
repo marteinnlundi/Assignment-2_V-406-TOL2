@@ -1,0 +1,4 @@
+"test","p_value"
+"purchase_power → sales",9.67015436871474e-17
+"consumer_sentiment → sales",7.72756556975974e-17
+"consumer_sentiment → purchase_power",0.76382450730808
