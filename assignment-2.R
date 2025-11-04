@@ -75,10 +75,28 @@ capture.output({
 #   • flag any p < 0.05 as evidence of causality
 
 # ----- 6) Summary output -----
-# TODO:
-#   • small tibble with DW p, ADF p, Granger p-values
-#   • write.csv() to outputs folder
-#   • short notes file explaining findings
+
+# For Task 1, only visual summary + short interpretation file
+
+summary_notes <- tibble(
+  task = "Task 1 — Time-Series Plot",
+  description = "Line chart of sales, purchase_power, and consumer_sentiment over time",
+  figure = FNF("02_line_all_indices","png"),
+  key_points = c(
+    "Indexes trend upward at varying rates",
+    "Possible short lead of purchase_power before sales",
+    "Consumer_sentiment appears smoother and lags slightly"
+  )
+)
+
+write.csv(summary_notes, FN("06_summary_task1", "csv"), row.names = FALSE)
+
+capture.output({
+  cat("=== Task 1 Summary ===\n")
+  cat("Visual comparison of the three indexes suggests similar long-run movement.\n")
+  cat("Purchase power and consumer sentiment may precede changes in sales slightly.\n")
+  cat("No statistical tests applied yet — interpretation is descriptive only.\n")
+}, file = FN("06_summary_task1_notes", "txt"))
 
 # ----- 99) Session info -----
-# TODO: capture.output(sessionInfo(), file = "outputs/99_sessionInfo.txt")
+capture.output(sessionInfo(), file = FN("99_sessionInfo", "txt"))
