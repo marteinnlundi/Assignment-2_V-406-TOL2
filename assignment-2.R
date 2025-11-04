@@ -59,6 +59,28 @@ capture.output({
 #   • plot residuals vs time (geom_line)
 #   • save plot
 
+# Simple regression model: sales ~ time
+m_time <- lm(sales ~ time, data = wide)
+
+# Save regression summary to file
+capture.output(summary(m_time), file = FN("03_regression_sales_time_summary", "txt"))
+
+# Add residuals to data
+wide <- wide |> mutate(resid_time = resid(m_time))
+
+# Plot residuals over time
+g2 <- ggplot(wide, aes(x = time, y = resid_time)) +
+  geom_line(linewidth = 0.8, color = "steelblue") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+  labs(title = "Residuals from Regression of Sales on Time",
+       x = "Time (Months)", y = "Residuals") +
+  theme_minimal(base_size = 11)
+
+
+ggsave(FNF("03_residuals_over_time", "png"), g2, width = 7, height = 5, dpi = 300)
+
+# Short text summary
+
 # ----- 4) Residual tests -----
 # TODO:
 #   • dwtest(model)
