@@ -59,6 +59,8 @@ capture.output({
 #   • plot residuals vs time (geom_line)
 #   • save plot
 
+# ----- 3) Regression (Task 2) -----
+
 # Simple regression model: sales ~ time
 m_time <- lm(sales ~ time, data = wide)
 
@@ -76,10 +78,18 @@ g2 <- ggplot(wide, aes(x = time, y = resid_time)) +
        x = "Time (Months)", y = "Residuals") +
   theme_minimal(base_size = 11)
 
-
 ggsave(FNF("03_residuals_over_time", "png"), g2, width = 7, height = 5, dpi = 300)
 
-# Short text summary
+# short note file for observations
+capture.output({
+  cat("=== Task 2: Regression of Sales on Time ===\n")
+  cat("Linear regression estimated: sales ~ time\n")
+  cat("Model summary written to 03_regression_sales_time_summary.txt\n")
+  cat("Residuals added to dataset (column: resid_time)\n")
+  cat("Residual plot saved in figs folder\n")
+  cat("Next: perform residual diagnostics for autocorrelation and stationarity (Task 2 continuation)\n")
+}, file = FN("03_regression_notes", "txt"))
+
 
 # ----- 4) Residual tests -----
 # TODO:
