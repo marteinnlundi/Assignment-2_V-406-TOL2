@@ -15,7 +15,6 @@ fig_dir <- file.path(out_dir, "figs")
 dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
 dir.create(fig_dir, showWarnings = FALSE, recursive = TRUE)
 
-# helper functions
 FN  <- function(stem, ext) file.path(out_dir, paste0(stem, "_", ts, ".", ext))
 FNF <- function(stem, ext) file.path(fig_dir, paste0(stem, "_", ts, ".", ext))
 
@@ -24,10 +23,8 @@ wide <- read_excel("as2_wideData_group6.xlsx") |> clean_names()
 long <- read_excel("as2_longData_group6.xlsx") |> clean_names()
 
 capture.output({
-  cat("=== WIDE DATA ===\n")
-  print(skim(wide))
-  cat("\n=== LONG DATA ===\n")
-  print(skim(long))
+  cat("=== WIDE DATA ===\n"); print(skim(wide))
+  cat("\n=== LONG DATA ===\n"); print(skim(long))
 }, file = FN("01_skim_data", "txt"))
 
 # ----- 2) Plot all indices (Task 1) -----
@@ -39,11 +36,6 @@ g1 <- ggplot(long, aes(x = time, y = value, color = name)) +
   theme(legend.position = "bottom")
 
 ggsave(FNF("02_line_all_indices", "png"), g1, width = 7, height = 5, dpi = 300)
-
-capture.output({
-  cat("=== Task 1: Line Plot Created ===\n")
-  cat("Figure saved in figs folder.\n")
-}, file = FN("02_plot_notes", "txt"))
 
 # ----- 3) Regression (Task 2) -----
 m_time <- lm(sales ~ time, data = wide)
@@ -60,22 +52,9 @@ g2 <- ggplot(wide, aes(x = time, y = resid_time)) +
 
 ggsave(FNF("03_residuals_over_time", "png"), g2, width = 7, height = 5, dpi = 300)
 
-capture.output({
-  cat("=== Task 2: Regression Completed ===\n")
-  cat("Model estimated: sales ~ time\n")
-  cat("Residuals added to dataset (resid_time).\n")
-  cat("Residual plot saved in figs folder.\n")
-}, file = FN("03_regression_notes", "txt"))
-
 # ----- 4) Residual tests -----
 dw_out  <- lmtest::dwtest(m_time)
 adf_out <- tseries::adf.test(wide$resid_time)
-
-capture.output({
-  cat("=== Task 2: Residual Diagnostics ===\n\n")
-  cat("Durbin–Watson Test:\n"); print(dw_out)
-  cat("\nAugmented Dickey–Fuller Test:\n"); print(adf_out)
-}, file = FN("04_residual_diagnostics_full", "txt"))
 
 dw_pval  <- dw_out$p.value
 adf_pval <- adf_out$p.value
@@ -88,7 +67,6 @@ capture.output({
 }, file = FN("04_residual_diagnostics_summary", "txt"))
 
 # ----- 5) Granger causality (Task 3) -----
-
 # --- (a) purchase_power → sales ---
 mod_sales_r <- lm(sales ~ sales_lag1 + sales_lag2 + sales_lag3, data = wide)
 mod_sales_pp <- lm(sales ~ sales_lag1 + sales_lag2 + sales_lag3 +
@@ -110,7 +88,7 @@ mod_pp_cs <- lm(purchase_power ~ purchase_power_lag1 + purchase_power_lag2 + pur
                 data = wide)
 anova_pp_cs <- anova(mod_pp_r, mod_pp_cs)
 
-# --- Save all test outputs ---
+# Save full ANOVA outputs
 capture.output({
   cat("=== Task 3: Granger Causality Tests (Manual ANOVA) ===\n\n")
   cat("(a) purchase_power → sales\n"); print(anova_sales_pp)
@@ -120,7 +98,7 @@ capture.output({
   cat("(c) consumer_sentiment → purchase_power\n"); print(anova_pp_cs)
 }, file = FN("05_granger_tests_full", "txt"))
 
-# --- Extract p-values into summary table ---
+# Compact summary table
 granger_summary <- tibble(
   test = c("purchase_power → sales",
            "consumer_sentiment → sales",
@@ -131,34 +109,6 @@ granger_summary <- tibble(
 )
 
 write.csv(granger_summary, FN("05_granger_tests_summary", "csv"), row.names = FALSE)
-
-capture.output({
-  cat("=== Task 3: Granger Test Summary ===\n")
-  print(granger_summary)
-  cat("\nNull hypothesis: lagged variable does NOT Granger-cause dependent variable.\n")
-  cat("Reject H0 if p < 0.05 (evidence of causality).\n")
-}, file = FN("05_granger_tests_notes", "txt"))
-
-
-# ----- 6) Summary output -----
-summary_notes <- tibble(
-  task = c("Task 1 — Line Plot", "Task 2 — Regression and Diagnostics"),
-  description = c(
-    "Line chart of sales, purchase_power, and consumer_sentiment over time",
-    "Linear regression of sales on time with residual diagnostics"
-  ),
-  figure = c(
-    FNF("02_line_all_indices", "png"),
-    FNF("03_residuals_over_time", "png")
-  )
-)
-
-write.csv(summary_notes, FN("06_summary_tasks", "csv"), row.names = FALSE)
-
-capture.output({
-  cat("=== Summary of Tasks 1 & 2 ===\n")
-  print(summary_notes)
-}, file = FN("06_summary_tasks_notes", "txt"))
 
 # ----- 99) Session info -----
 capture.output(sessionInfo(), file = FN("99_sessionInfo", "txt"))
